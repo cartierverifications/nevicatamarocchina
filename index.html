@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATTENZIONE: NEVICATA MAROCCHINA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Space+Mono:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Space Mono', monospace;
+            overflow: hidden;
+            background-color: #0d0000;
+        }
+
+        .oswald {
+            font-family: 'Oswald', sans-serif;
+        }
+
+        /* Effetto Strobo di Emergenza */
+        @keyframes strobe {
+            0%, 49% { background-color: #0d0000; }
+            50%, 100% { background-color: #990000; }
+        }
+
+        .strobe-active {
+            animation: strobe 0.4s infinite;
+        }
+
+        /* Animazione per i fiocchi di neve */
+        @keyframes fall {
+            0% {
+                transform: translateY(-10vh) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.8;
+            }
+            90% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(110vh) translateX(50px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .snowflake {
+            position: absolute;
+            color: #ffffff;
+            user-select: none;
+            pointer-events: none;
+            z-index: 10;
+            will-change: transform;
+        }
+
+        /* Righe diagonali stile emergenza */
+        .hazard-stripes {
+            background: repeating-linear-gradient(
+                45deg,
+                #f59e0b,
+                #f59e0b 20px,
+                #000000 20px,
+                #000000 40px
+            );
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col justify-between relative select-none">
+
+    <div id="snow-container" class="absolute inset-0 pointer-events-none overflow-hidden z-10"></div>
+
+    <div id="interaction-overlay" class="absolute inset-0 bg-black z-50 flex flex-col items-center justify-center p-6 text-center">
+        <div class="max-w-md w-full border-4 border-amber-500 rounded-2xl p-8 bg-zinc-900 shadow-[0_0_50px_rgba(245,158,11,0.3)] flex flex-col items-center gap-6">
+            <!-- Icona NFC / Allerta -->
+            <div class="w-24 h-24 rounded-full bg-amber-500/10 border-2 border-amber-500 flex items-center justify-center animate-pulse">
+                <svg class="w-12 h-12 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+            </div>
+            
+            <div class="space-y-2">
+                <h2 class="text-amber-500 text-xs tracking-widest uppercase font-bold">NFC Collegato con Successo</h2>
+                <h1 class="text-white text-2xl font-bold uppercase tracking-tight">Sistema di Allerta Nazionale</h1>
+                <p class="text-zinc-400 text-sm">Tocca il pulsante rosso se stai per pippare.</p>
+            </div>
+
+            <button id="activate-btn" class="w-full py-4 bg-red-600 hover:bg-red-700 active:scale-95 text-white font-bold rounded-xl text-lg uppercase tracking-wider shadow-[0_4px_20px_rgba(220,38,38,0.5)] transition duration-200">
+                🚨 Ricevi Messaggio 🚨
+            </button>
+        </div>
+    </div>
+
+    <div class="h-6 hazard-stripes w-full z-20 shadow-md"></div>
+
+    <main class="flex-1 flex flex-col items-center justify-center text-center p-4 z-20 select-none">
+        <div class="max-w-4xl mx-auto space-y-6">
+            
+            <!-- Badge Lampeggiante -->
+            <div class="inline-flex items-center gap-2 bg-red-600 text-white font-bold px-4 py-1.5 rounded-full text-xs md:text-sm tracking-widest uppercase shadow-lg animate-bounce">
+                <span class="w-2.5 h-2.5 rounded-full bg-white animate-ping"></span>
+                ALLERTA ROSSA IN CORSO
+            </div>
+
+            <!-- Titolo Principale ad altissimo impatto -->
+            <h1 class="oswald text-5xl md:text-8xl font-black text-yellow-400 tracking-tight leading-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
+                ATTENZIONE!
+            </h1>
+
+            <div class="border-y-4 border-dashed border-red-500 py-6 md:py-8 my-4">
+                <p class="oswald text-4xl md:text-7xl font-extrabold text-white uppercase tracking-wide leading-none drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)]">
+                    NEVICATA DI BAMBA<br>
+                    <span class="text-red-500">IN ARRIVO!</span>
+                </p>
+            </div>
+
+            <p class="text-zinc-300 text-sm md:text-lg max-w-xl mx-auto font-medium bg-black/60 backdrop-blur-sm p-4 rounded-xl border border-zinc-800">
+                Si prega di mettersi al riparo immediatamente e preparare l'attrezzatura di salvataggio.
+            </p>
+
+            <!-- Pulsante per silenziare o riattivare in seguito -->
+            <button id="mute-btn" class="mx-auto mt-6 flex items-center gap-2 px-5 py-2.5 bg-zinc-900 border border-zinc-700 text-zinc-300 hover:text-white rounded-full text-xs uppercase tracking-wider transition hover:bg-zinc-800 active:scale-95">
+                <svg id="mute-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>
+                </svg>
+                <span id="mute-text">Spegni Allarme</span>
+            </button>
+
+        </div>
+    </main>
+
+    <!-- Barra in basso -->
+    <div class="h-6 hazard-stripes w-full z-20 shadow-md"></div>
+
+    <script>
+        // Configurazione Sintetizzatore Siren (Web Audio API)
+        let audioCtx = null;
+        let mainOsc = null;
+        let lfo = null;
+        let mainGain = null;
+        let isSirenPlaying = false;
+
+        // Inizializza e avvia la sirena sintetica d'emergenza
+        function startEmergencySiren() {
+            if (isSirenPlaying) return;
+
+            try {
+                // Crea il contesto audio
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Oscillatore principale (genera l'onda acustica)
+                mainOsc = audioCtx.createOscillator();
+                mainOsc.type = 'sawtooth'; // Onda a dente di sega per un suono penetrante ed aspro
+                mainOsc.frequency.setValueAtTime(450, audioCtx.currentTime); // Frequenza base (Hz)
+
+                // LFO (Oscillatore a bassa frequenza) per modulare il pitch su e giù (effetto sirena)
+                lfo = audioCtx.createOscillator();
+                lfo.frequency.setValueAtTime(1.2, audioCtx.currentTime); // Velocità dell'oscillazione (1.2 oscillazioni al secondo)
+
+                // Guadagno per regolare l'intensità della deviazione di frequenza
+                const lfoGain = audioCtx.createGain();
+                lfoGain.gain.setValueAtTime(180, audioCtx.currentTime); // Oscilla di +/- 180Hz
+
+                // Controllo volume principale
+                mainGain = audioCtx.createGain();
+                mainGain.gain.setValueAtTime(0.0, audioCtx.currentTime); // Parte silenzioso
+                
+                // Connessioni
+                lfo.connect(lfoGain);
+                lfoGain.connect(mainOsc.frequency); // Modula la frequenza dell'oscillatore principale
+                
+                mainOsc.connect(mainGain);
+                mainGain.connect(audioCtx.destination);
+
+                // Avvia gli oscillatori
+                lfo.start();
+                mainOsc.start();
+                
+                // Sfuma il volume in ingresso rapidamente per evitare click acustici
+                mainGain.gain.linearRampToValueAtTime(0.35, audioCtx.currentTime + 0.1);
+                
+                isSirenPlaying = true;
+                updateMuteUI(true);
+            } catch (error) {
+                console.error("Impossibile avviare il sintetizzatore audio:", error);
+            }
+        }
+
+        // Spegne o riattiva la sirena
+        function toggleSiren() {
+            if (!audioCtx) {
+                startEmergencySiren();
+                return;
+            }
+
+            if (isSirenPlaying) {
+                // Silenzia gradualmente
+                mainGain.gain.linearRampToValueAtTime(0.0, audioCtx.currentTime + 0.1);
+                isSirenPlaying = false;
+                updateMuteUI(false);
+            } else {
+                // Ripristina volume
+                mainGain.gain.linearRampToValueAtTime(0.35, audioCtx.currentTime + 0.1);
+                isSirenPlaying = true;
+                updateMuteUI(true);
+            }
+        }
+
+        function updateMuteUI(active) {
+            const btnText = document.getElementById('mute-text');
+            const btnIcon = document.getElementById('mute-icon');
+            if (active) {
+                btnText.textContent = "Spegni Allarme";
+                btnIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>`;
+            } else {
+                btnText.textContent = "Attiva Allarme";
+                btnIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>`;
+            }
+        }
+
+        const snowContainer = document.getElementById('snow-container');
+        const snowSymbols = ['❄', '❅', '❆', '•', '*'];
+
+        function createSnowflake() {
+            const flake = document.createElement('div');
+            flake.classList.add('snowflake');
+            
+            // Proprietà casuali per ogni fiocco
+            const size = Math.random() * 20 + 8; // Dimensione tra 8px e 28px
+            const left = Math.random() * 100; // Posizione orizzontale di partenza (%)
+            const duration = Math.random() * 5 + 4; // Durata della caduta tra 4s e 9s
+            const delay = Math.random() * 2; // Ritardo di partenza
+            
+            flake.innerText = snowSymbols[Math.floor(Math.random() * snowSymbols.length)];
+            flake.style.fontSize = `${size}px`;
+            flake.style.left = `${left}vw`;
+            flake.style.animation = `fall ${duration}s linear ${delay}s infinite`;
+            
+            // Fiocchi di neve leggermente colorati di arancione/sabbia per il tema "Marocchina" (scirocco)
+            if (Math.random() > 0.6) {
+                flake.style.color = '#f59e0b'; // Colore arancione sabbioso
+                flake.style.filter = 'drop-shadow(0 0 5px rgba(245, 158, 11, 0.5))';
+            } else {
+                flake.style.color = '#ffffff';
+                flake.style.filter = 'drop-shadow(0 0 5px rgba(255, 255, 255, 0.5))';
+            }
+
+            snowContainer.appendChild(flake);
+
+            // Rimuove l'elemento dopo che la caduta è finita per non appesantire il browser
+            setTimeout(() => {
+                flake.remove();
+            }, (duration + delay) * 1000);
+        }
+
+        // Genera continuamente fiocchi
+        setInterval(createSnowflake, 150);
+
+        const overlay = document.getElementById('interaction-overlay');
+        const activateBtn = document.getElementById('activate-btn');
+        const muteBtn = document.getElementById('mute-btn');
+
+        // Al click sul pulsantone iniziale
+        activateBtn.addEventListener('click', () => {
+            // Rimuove l'overlay d'ingresso
+            overlay.classList.add('hidden');
+            
+            // Attiva lo strobo di sfondo
+            document.body.classList.add('strobe-active');
+            
+            // Avvia la sirena
+            startEmergencySiren();
+        });
+
+        // Pulsante Mute per fermare/riavviare la sirena a schermo aperto
+        muteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleSiren();
+        });
+    </script>
+</body>
+</html>
